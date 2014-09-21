@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<!--Copyright (c) 2012 Microsoft Corporation.  All rights reserved. 
+    Use of this sample source code is subject to the terms of the Microsoft license 
+    agreement under which you licensed this sample source code and is provided AS-IS. 
+    If you did not accept the terms of the license agreement, you are not authorized 
+    to use this sample source code.  For the terms of the license, please see the 
+    license agreement between you and Microsoft.--> 
+<html>
+<head>    
+    <title>TranslatorApp</title>
+    <script>
+        var Trans = Bing.Translator.TranslatorLibrary("YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET");
+        var LanguageCodes = [];
+        var LanguageNames = [];
+
+        /// <summary> Make an async call to get the list of supported language codes and write them to 
+        /// the LanguageCodes array. Then from within the same call, make a second async call to 
+        /// fill the LanguageNames array. Then from within that call, use the LanguageNames array
+        /// to populate two HTML SELECT objects. </summary>
+        function PopulateLanguages() {
+            Trans.getLanguagesAsync().then(function (result) {
+                LanguageCodes = result.languages;
+                Trans.getLanguageNamesAsync("en", LanguageCodes).then(function (result) {
+                    LanguageNames = result.languages;
+                    FillList('LanguageFromList');
+                    FillList('LanguageToList');
+                })
+            });
+        }
+
+        /// <summary> Populate an HTML SELECT object with the values in the LanguageNames array. </summary>
+        /// <param name="list" type="String"> The ID value of the HTML SELECT object </param>
+        function FillList(list) {
+            for (var i = 0; i < LanguageCodes.length; i++) {
+                var opt = document.createElement("option");
+                opt.innerHTML = LanguageNames[i];
+                document.getElementById(list).appendChild(opt);
+            }
+        }
+
+        /// <summary>Get the languageFrom, languageTo, and textToTranslate parameter values from UI elements 
+        /// on the page, and then start translation with those parameters. </summary>
+        function GoButton_Click() {
+            var TranslateFrom = 'English';
+            var TranslateTo = 'Spanish';
+            var txt = document.getElementById('InputText').innerText
+            document.getElementById('OutputText').innerText = 'derp';
+            Trans.translateAsync(TranslateFrom, TranslateTo, "", txt
+            ).then(function (result) {
+                document.getElementById('OutputText').innerText = result.textTranslated;
+            });
+        }
+    </script>
+
+</head>
+<body onload="PopulateLanguages()">
+    <form>
+        <div>
+            Translate from <br />
+            <select id="LanguageFromList"></select>
+        </div>
+        <div>
+            Translate to <br />
+            <select id="LanguageToList"></select>
+        </div>
+        <div>
+            Text to translate <br />
+            <textarea id="InputText"></textarea>
+        </div>
+        <div>
+            Returned text <br />
+            <textarea id="OutputText"></textarea>
+        </div>
+        <input type="button" onclick="GoButton_Click()" value="Translate" />
+    </form>
+</body>
+</html>
